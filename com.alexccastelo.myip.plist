@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.alexccastelo.myip</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/alexccastelo/projetos/myip/check_ip.sh</string>
+    </array>
+
+    <!-- Roda 1x por dia (86400 segundos) -->
+    <key>StartInterval</key>
+    <integer>86400</integer>
+
+    <!-- Roda também na inicialização do sistema -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/alexccastelo/.myip/launchd.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/alexccastelo/.myip/launchd.log</string>
+</dict>
+</plist>
