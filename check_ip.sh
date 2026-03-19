@@ -19,11 +19,20 @@ if [ -z "$TELEGRAM_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
   exit 1
 fi
 
-# Busca IP atual
-CURRENT_IP=$(curl -s --max-time 10 https://api.ipify.org)
+# Busca IP atual (com retry para aguardar rede após boot/wake)
+MAX_RETRIES=5
+RETRY_WAIT=10
+CURRENT_IP=""
+
+for i in $(seq 1 $MAX_RETRIES); do
+  CURRENT_IP=$(curl -s --max-time 10 https://api.ipify.org)
+  [ -n "$CURRENT_IP" ] && break
+  echo "[$TIMESTAMP] Tentativa $i/$MAX_RETRIES: rede indisponível, aguardando ${RETRY_WAIT}s..." >> "$LOG"
+  sleep $RETRY_WAIT
+done
 
 if [ -z "$CURRENT_IP" ]; then
-  echo "[$TIMESTAMP] Erro: não foi possível obter o IP público" >> "$LOG"
+  echo "[$TIMESTAMP] Erro: não foi possível obter o IP após $MAX_RETRIES tentativas" >> "$LOG"
   exit 1
 fi
 
@@ -46,5 +55,9 @@ if [ "$CURRENT_IP" != "$LAST_IP" ]; then
 
   echo "$CURRENT_IP" > "$LAST_IP_FILE"
 else
-  echo "[$TIMESTAMP] IP sem mudança: $CURRENT_IP" >> "$LOG"
+  MSG="IP publico sem mudanca.%0AAtual: ${CURRENT_IP}"
+  curl -s --max-time 10 \
+    "https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage" \
+    -d "chat_id=${TELEGRAM_CHAT_ID}&text=${MSG}" > /dev/null
+  echo "[$TIMESTAMP] IP sem mudança: $CURRENT_IP. Notificação enviada." >> "$LOG"
 fi
