@@ -42,6 +42,14 @@ echo "==> Carregando agente launchd..."
 launchctl load "$PLIST_DEST"
 
 echo ""
+# Ativa sleepwatcher para rodar o script ao acordar o Mac
+if command -v sleepwatcher &> /dev/null; then
+  echo "==> Ativando sleepwatcher (wake from sleep)..."
+  brew services start sleepwatcher 2>/dev/null || brew services restart sleepwatcher
+else
+  echo "AVISO: sleepwatcher não encontrado. Instale com: brew install sleepwatcher"
+fi
+
 echo "✓ Instalação concluída!"
 echo ""
 echo "Próximos passos:"
